@@ -23,7 +23,10 @@
 </head>
 <body>
   <h2>Scatta o carica la foto della scheda</h2>
-  <input type="file" accept="image/*" capture="environment" id="imageInput">
+  <label for="imageInput" style="display:block; font-weight:bold; margin:20px;">
+    Scatta o seleziona una foto:
+  </label>
+  <input type="file" id="imageInput" accept="image/*" capture="environment">
   <br>
   <button onclick="submitImage()">Invia</button>
   <p id="loading">Elaborazione in corso...</p>
