@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acquisizione Scheda</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    input[type="file"] {
+      margin: 20px 0;
+    }
+    #loading {
+      display: none;
+    }
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Scatta o carica la foto della scheda</h2>
+  <input type="file" accept="image/*" capture="environment" id="imageInput">
+  <br>
+  <button onclick="submitImage()">Invia</button>
+  <p id="loading">Elaborazione in corso...</p>
+  <div id="result"></div>
+
+  <script>
+    async function submitImage() {
+      const input = document.getElementById('imageInput');
+      const file = input.files[0];
+      if (!file) {
+        alert("Seleziona una foto prima di inviare.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        document.getElementById("loading").style.display = "block";
+        const base64Image = reader.result.split(',')[1];
+
+        try {
+          const response = await fetch('https://ocr-backend-003k.onrender.com/estrai-dati', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ image: base64Image })
+          });
+
+          const data = await response.json();
+          document.getElementById("loading").style.display = "none";
+
+          if (data.url) {
+            document.getElementById("result").innerHTML = `<p><strong>Link al modulo precompilato:</strong><br><a href="${data.url}" target="_blank">Apri Modulo</a></p>`;
+          } else {
+            document.getElementById("result").innerHTML = `<p>Errore: ${data.error || 'Impossibile generare URL.'}</p>`;
+          }
+        } catch (err) {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("result").innerHTML = `<p>Errore durante l'invio: ${err.message}</p>`;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
